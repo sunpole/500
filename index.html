@@ -896,7 +896,7 @@ function getDeltaTime() {
  * @returns {number} множитель здоровья врагов
  */
 function scalingHP(wave) {
-  const bonus = Math.floor((wave - 1) / 5) * 0.30;
+  const bonus = Math.floor((wave - 1) / 5) * 150;
   return 1 + bonus;
 }
 
@@ -933,7 +933,7 @@ function scalingDamage(wave) {
  * @returns {number} общий множитель
  */
 function scalingAll(wave) {
-  const bonus = Math.floor((wave - 1) / 15) * 0.10;
+  const bonus = Math.floor((wave - 1) / 10) * 0.20;
   return 1 + bonus;
 }
 
