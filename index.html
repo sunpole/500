@@ -351,13 +351,13 @@ const enemyData = [
   { name: "Банан",   hp: 120,   speed: 120, color: '#fcbf2f', reward: 6, damage: 1 },  
   { name: "Авокадо", hp: 850,   speed: 100, color: '#8fc74e', reward: 15, damage: 2 },  
   { name: "Арбуз",   hp: 4000,  speed: 200, color: '#4edc9e', reward: 120, damage: 4 },
-  { name: "Дыня",    hp: 2000,  speed: 1200, color: '#ffca98', reward: 180, damage: 4 },  
+  { name: "Дыня",    hp: 2000,  speed: 300, color: '#ffca98', reward: 180, damage: 4 },  
   { name: "Груша",   hp: 8000,  speed: 200, color: '#a7d09b', reward: 65, damage: 4 },
   { name: "Капуста", hp: 5000,  speed: 50,  color: '#a3d0a6', reward: 100, damage: 3 },
   { name: "Свекла",  hp: 6000,  speed: 60,  color: '#c84b3f', reward: 110, damage: 5 },
-  { name: "Баклажан", hp: 7000, speed: 70,  color: '#5c3e7f', reward: 130, damage: 6 },
-  { name: "Помидор", hp: 7500,  speed: 80,  color: '#ff4d4d', reward: 140, damage: 6 },
-  { name: "Тыква",   hp: 10000, speed: 30,  color: '#ff9838', reward: 200, damage: 8 }
+  { name: "Баклажан", hp: 70000, speed: 70,  color: '#5c3e7f', reward: 130, damage: 6 },
+  { name: "Помидор", hp: 75000,  speed: 80,  color: '#ff4d4d', reward: 140, damage: 6 },
+  { name: "Тыква",   hp: 100000, speed: 30,  color: '#ff9838', reward: 200, damage: 8 }
 ];
 
 // Сортировка по количеству здоровья (hp)
@@ -377,17 +377,17 @@ const towerData = [
   },
   {
     name: "🦎 Геккон",
-    cost: 22,
+    cost: 27,
     range: 2.5,
-    damage: 2,
+    damage: 1,
     cooldown: 0.2,
     color: '#a0f5c4',
-    bulletSpeed: 720,
+    bulletSpeed: 500,
     dot: {
       type: "poison",
-      dps: 10,
-      stackDuration: 2.5,
-      maxStacks: 5,
+      dps: 30,
+      stackDuration: 10,
+      maxStacks: 50,
       multiDps: true,
       multiStacks: true
     }
@@ -396,7 +396,7 @@ const towerData = [
     name: "🦜 Попугайчик",
     cost: 28,
     range: 4.0,
-    damage: 4,
+    damage: 9,
     cooldown: 0.15,
     color: '#ffe3ac',
     bulletSpeed: 800
@@ -404,11 +404,11 @@ const towerData = [
   {
     name: "🦉 Совёнок",
     cost: 32,
-    range: 4.5,
-    damage: 5,
-    cooldown: 0.04,
+    range: 3,
+    damage: 2,
+    cooldown: 0.10,
     color: '#ccf1ff',
-    bulletSpeed: 2,
+    bulletSpeed: 1,
     laser: true
   },
 
@@ -417,7 +417,7 @@ const towerData = [
     name: "🦊 Лиса",
     cost: 60,
     range: 3.5,
-    damage: 55,
+    damage: 75,
     cooldown: 0.9,
     color: '#ffa64d',
     bulletSpeed: 1000
@@ -425,14 +425,14 @@ const towerData = [
   {
     name: "🦔 Ёж",
     cost: 65,
-    range: 3.5,
-    damage: 3,
-    cooldown: 0.25,
+    range: 4,
+    damage: 1,
+    cooldown: 0.20,
     color: '#8ee5a2',
-    bulletSpeed: 640,
+    bulletSpeed: 700,
     dot: {
       type: "poison",
-      dps: 20,
+      dps: 80,
       stackDuration: 4,
       maxStacks: 10,
       multiDps: true,
@@ -443,17 +443,17 @@ const towerData = [
     name: "🦅 Орёл",
     cost: 70,
     range: 5.0,
-    damage: 6,
-    cooldown: 0.03,
+    damage: 3,
+    cooldown: 0.05,
     color: '#b7b7ff',
-    bulletSpeed: 3,
+    bulletSpeed: 5,
     laser: true
   },
   {
     name: "🦘 Кенгуру",
     cost: 75,
     range: 3.0,
-    damage: 6,
+    damage: 50,
     cooldown: 0.08,
     color: '#ffcfde',
     bulletSpeed: 1600
@@ -473,34 +473,34 @@ const towerData = [
     name: "🐆 Гепард",
     cost: 260,
     range: 2.5,
-    damage: 25,
-    cooldown: 0.03,
+    damage: 95,
+    cooldown: 0.02,
     color: '#ffc700',
-    bulletSpeed: 2200
+    bulletSpeed: 2800
   },
   {
     name: "🐉 Дракон",
     cost: 280,
-    range: 5.5,
+    range: 5,
     damage: 20,
-    cooldown: 0.015,
+    cooldown: 0.01,
     color: '#7b2fff',
-    bulletSpeed: 1,
+    bulletSpeed: 12,
     laser: true
   },
   {
     name: "🦂 Скорпион",
-    cost: 300,
+    cost: 800,
     range: 4.0,
-    damage: 2,
-    cooldown: 0.2,
+    damage: 80,
+    cooldown: 0.15,
     color: '#00f5ff',
-    bulletSpeed: 800,
+    bulletSpeed: 1400,
     dot: {
       type: "poison",
-      dps: 80,
-      stackDuration: 3,
-      maxStacks: 25,
+      dps: 800,
+      stackDuration: 6,
+      maxStacks: 250,
       multiDps: true,
       multiStacks: true
     }
@@ -524,9 +524,9 @@ const towerData = [
 
 
 const waveData = [
-  { enemies: [ {e:0, n:7, d:0.62} ] },
-  { enemies: [ {e:0, n:9, d:0.59}, {e:1, n:4, d:0.66} ] },
-  { enemies: [ {e:0, n:11, d:0.56}, {e:1, n:5, d:0.64} ] },
+  { enemies: [ {e:0, n:12, d:0.2} ] },
+  { enemies: [ {e:0, n:9, d:0.5}, {e:1, n:4, d:0.066} ] },
+  { enemies: [ {e:0, n:11, d:0.06}, {e:1, n:5, d:0.04} ] },
   { enemies: [ {e:0, n:13, d:0.53}, {e:1, n:6, d:0.62} ] },
   // Волна 5
   { enemies: [ {e:0, n:15, d:0.4}, {e:1, n:10, d:0.45}, {e:2, n:1, d:2.0} ] },
@@ -580,12 +580,12 @@ const waveData = [
   // Волна 40
   { enemies: [ {e:3, n:2, d:3.5}, {e:4, n:14, d:1.0}, {e:5, n:13, d:0.9} ] },
 
-  { enemies: [ {e:3, n:3, d:3.2}, {e:4, n:14, d:1.0}, {e:5, n:13, d:0.9} ] },
-  { enemies: [ {e:3, n:4, d:2.9}, {e:4, n:14, d:1.0}, {e:5, n:13, d:0.9} ] },
-  { enemies: [ {e:3, n:5, d:2.6}, {e:4, n:14, d:1.0}, {e:5, n:13, d:0.9} ] },
-  { enemies: [ {e:3, n:6, d:2.3}, {e:4, n:15, d:1.0}, {e:5, n:14, d:0.9} ] },
+  { enemies: [ {e:3, n:30, d:3.2}, {e:4, n:14, d:1.0}, {e:5, n:130, d:0.9} ] },
+  { enemies: [ {e:3, n:40, d:2.9}, {e:4, n:14, d:1.0}, {e:5, n:130, d:0.9} ] },
+  { enemies: [ {e:3, n:50, d:2.6}, {e:4, n:14, d:1.0}, {e:5, n:103, d:0.9} ] },
+  { enemies: [ {e:3, n:60, d:2.3}, {e:4, n:15, d:1.0}, {e:5, n:104, d:0.9} ] },
   // Волна 45
-  { enemies: [ {e:3, n:7, d:2.0}, {e:4, n:15, d:1.0}, {e:5, n:14, d:0.9} ] }
+  { enemies: [ {e:3, n:70, d:0.01}, {e:4, n:815, d:1.0}, {e:5, n:104, d:0.9} ] }
 ];
 
 /*
