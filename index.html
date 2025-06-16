@@ -900,6 +900,11 @@ function scalingHP(wave) {
   return 1 + bonus;
 }
 
+function scalingHP(wave) {
+  const bonus = Math.floor((wave - 1) / 1) * 50;
+  return 1 + bonus;
+}
+
 /**
  * @param {number} wave
  * @returns {number} множитель скорости
@@ -915,7 +920,7 @@ function scalingSpeed(wave) {
  * @returns {number} множитель награды
  */
 function scalingReward(wave) {
-  const bonus = Math.floor((wave - 1) / 5) * 0.10;
+  const bonus = Math.floor((wave - 1) / 5) * 2.00;
   return 1 + bonus;
 }
 
