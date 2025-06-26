@@ -1,4 +1,6 @@
 // ===== UI функции =====
+import { towerData, waveData } from './constants.js';
+import { state } from './state.js';
 
 // Сортируем индексы башен по цене для удобства поиска следующей/предыдущей башни
 const towerCostOrder = towerData
@@ -38,7 +40,7 @@ function isLight(color) {
  * @param {number|null} x - координаты (не используются сейчас)
  * @param {number|null} y
  */
-function showTowerInfo(type, x = null, y = null) {
+export function showTowerInfo(type, x = null, y = null) {
   let conf = towerData[type];
   if (!conf) {
     console.warn(`showTowerInfo: башня с типом ${type} не найдена в towerData`);
@@ -226,33 +228,16 @@ function mkBtn(label, cb, color, enabled) {
     '" onclick="' + (enabled ? cb : 'void(0)') + '">' + label + '</button>';
 }
 
-function sellTower(x, y) {
-  let cell = grid[y][x];
-  if (!cell.tower) return false;
-  let type = cell.tower.type;
-  let refund = Math.round(0.5 * towerData[type].cost);
-  money += refund;
-  // Удаляем башню из массива и из сетки:
-  let ind = towers.indexOf(cell.tower);
-  if (ind > -1) towers.splice(ind, 1);
-  grid[y][x].tower = null;
-  grid[y][x].blocked = false;
-  updateUI();
-  hideTowerInfo();
-  generateEnemyPath();
-  recalcPathsForAllEnemies();
-  return true;
-}
 
 function upgradeTower(x, y) {
-  let cell = grid[y][x];
+  let cell = state.grid[y][x];
   if (!cell.tower) return false;
   let curType = cell.tower.type;
   let nextType = getNextTowerType(curType);
   if (nextType === null) return false;
   let upgradeCost = towerData[nextType].cost;
-  if (money < upgradeCost) return false;
-  money -= upgradeCost;
+  if (state.money < upgradeCost) return false;
+  state.money -= upgradeCost;
   cell.tower.type = nextType;
   updateUI();
   showTowerInfo(nextType, x, y); // <-- остаётся открытым, обновляется на новую башню
@@ -260,27 +245,27 @@ function upgradeTower(x, y) {
 }
 
 function downgradeTower(x, y) {
-  let cell = grid[y][x];
+  let cell = state.grid[y][x];
   if (!cell.tower) return false;
   let curType = cell.tower.type;
   let prevType = getPrevTowerType(curType);
   if (prevType === null) return false;
   let downgradeRefund = towerData[prevType].cost;
-  money += downgradeRefund;
+  state.money += downgradeRefund;
   cell.tower.type = prevType;
   updateUI();
   showTowerInfo(prevType, x, y); // <-- остаётся открытым, обновляется на новую башню
   return true;
 }
 
-function hideTowerInfo() {
+export function hideTowerInfo() {
   const el = document.getElementById('tower-info');
   if (el) {
     el.style.display = "none";
   }
 }
 
-function createUIButtons() {
+export function createUIButtons() {
   let panel = document.getElementById('ui-panel');
   if (!panel) {
     console.warn('createUIButtons: элемент #ui-panel не найден');
@@ -288,9 +273,9 @@ function createUIButtons() {
   }
 
   let html = '';
-  html += `<span class="money">${money}</span> | `;
-  html += `<span class="health">${health} жизней</span> | `;
-  html += `<span class="wave">${wave} / ${waveData.length} волна</span>  `;
+  html += `<span class="money">${state.money}</span> | `;
+  html += `<span class="health">${state.health} жизней</span> | `;
+  html += `<span class="wave">${state.wave} / ${waveData.length} волна</span>  `;
   html += '<hr style="margin:6px 2px">';
 
   // Вспомогательная функция затемнения цвета
@@ -318,11 +303,11 @@ function createUIButtons() {
   // Генерация кнопок башен
   for (let i = 0; i < towerData.length; ++i) {
     let baseColor = towerData[i].color;
-    let affordable = money >= towerData[i].cost;
+    let affordable = state.money >= towerData[i].cost;
     let background = affordable ? baseColor : darkenColor(baseColor, 0.6);
     let textColor = isLight(background) ? "#282828" : "#fff";
     if (!affordable) textColor = "#888";
-    let selClass = (selectedTowerType == i ? "selected" : "");
+    let selClass = (state.selectedTowerType == i ? "selected" : "");
     let btnStyle = `background:${background};color:${textColor};border:1.5px solid #222;`;
 
     html += '<button ' +
@@ -341,7 +326,7 @@ function createUIButtons() {
   }
 
   // Кнопки апгрейда и продажи башни (появляются только при выборе башни)
-  if (selectedTowerType !== null) {
+  if (state.selectedTowerType !== null) {
     html += `<div class="upgrade-sell-buttons">`;
     html += `<button onclick="upgradeTower()">Апгрейд</button>`;
     html += `<button onclick="sellTower()">Продать</button>`;
@@ -369,42 +354,31 @@ function createUIButtons() {
   panel.innerHTML = html;
 }
 
-function updateUI() {
+export function updateUI() {
   createUIButtons();
 }
 
-function selectTowerType(i) {
-  if (money < towerData[i].cost) return false;
-  selectedTowerType = i;
-  isPlacingTower = true;
-  buildZoneHints = [];
+export function selectTowerType(i) {
+  if (state.money < towerData[i].cost) return false;
+  state.selectedTowerType = i;
+  state.isPlacingTower = true;
+  state.buildZoneHints = [];
   placingTowerCell = null;
   updateUI();
 }
 
-function clearTowerSelection() {
-  selectedTowerType = null;
-  isPlacingTower = false;
-  buildZoneHints = [];
-  placingTowerCell = null;
+export function clearTowerSelection() {
+  state.selectedTowerType = null;
+  state.isPlacingTower = false;
+  state.buildZoneHints = [];
+  state.placingTowerCell = null;
   updateUI();
 }
 
 
-// Скрыть окно с информацией о башне
-function hideTowerInfo() {
-  const el = document.getElementById('tower-info');
-  if (el) {
-    el.style.display = "none";
-  }
-  // Сброс выделения башни (если нужно)
-  // selectedTowerType = null;
-  // isPlacingTower = false;
-  // Можно раскомментировать, если нужно сбрасывать выбор
-}
 
 // Инициализация UI — создаём контейнеры, если их нет
-function initUI() {
+export function initUI() {
   if (!document.getElementById('ui-panel')) {
     const uiPanel = document.createElement('div');
     uiPanel.id = 'ui-panel';

@@ -1,10 +1,10 @@
-// ===== Константы и параметры =====  
-const GRID_SIZE = 15;  
-const CELL_SIZE = 40;  
-const CANVAS_WIDTH = GRID_SIZE * CELL_SIZE;  
-const CANVAS_HEIGHT = GRID_SIZE * CELL_SIZE;  
+// ===== Константы и параметры =====
+export const GRID_SIZE = 15;
+export const CELL_SIZE = 40;
+export const CANVAS_WIDTH = GRID_SIZE * CELL_SIZE;
+export const CANVAS_HEIGHT = GRID_SIZE * CELL_SIZE;
 
-const enemyData = [  
+export const enemyData = [
   { name: "Яблоко",  hp: 80,    speed: 250, color: '#ff3e3e', reward: 7, damage: 1 },  
   { name: "Банан",   hp: 120,   speed: 120, color: '#fcbf2f', reward: 6, damage: 1 },  
   { name: "Авокадо", hp: 850,   speed: 100, color: '#8fc74e', reward: 15, damage: 2 },  
@@ -18,7 +18,7 @@ const enemyData = [
   { name: "Тыква",   hp: 100000, speed: 30,  color: '#ff9838', reward: 200, damage: 8 }
 ];
 
-const towerData = [
+export const towerData = [
   // 🌸 ДЕШЁВЫЕ БАШНИ (для старта)
   {
     name: "🐭 Мышка",
@@ -161,7 +161,7 @@ const towerData = [
   }
 ];
 
-const waveData = [
+export const waveData = [
   { enemies: [ {e:0, n:12, d:0.2} ] },
   { enemies: [ {e:0, n:9, d:0.5}, {e:1, n:4, d:0.066} ] },
   { enemies: [ {e:0, n:11, d:0.06}, {e:1, n:5, d:0.04} ] },
