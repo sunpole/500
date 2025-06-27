@@ -1,3 +1,5 @@
+//js/constants.js
+
 // ===== Константы и параметры =====
 export const GRID_SIZE = 15;
 export const CELL_SIZE = 40;
