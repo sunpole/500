@@ -1,6 +1,7 @@
 // ===== UI функции =====
 import { towerData, waveData } from './constants.js';
 import { state } from './state.js';
+import versionInfo from '../version.json';
 
 // Сортируем индексы башен по цене для удобства поиска следующей/предыдущей башни
 const towerCostOrder = towerData
@@ -9,14 +10,14 @@ const towerCostOrder = towerData
   .map(t => t.i);                        // Оставляем только индексы башен
 
 // Получить индекс следующей/предыдущей башни по цене
-function getNextTowerType(type) {
+export function getNextTowerType(type) {
   let idx = towerCostOrder.indexOf(type);
   // Если текущей башни нет в списке или это самая дорогая, возвращаем null
   if (idx === -1 || idx === towerCostOrder.length - 1) return null;
   return towerCostOrder[idx + 1];
 }
 
-function getPrevTowerType(type) {
+export function getPrevTowerType(type) {
   let idx = towerCostOrder.indexOf(type);
   // Если башня первая или нет в списке — null
   if (idx <= 0) return null;
@@ -32,6 +33,79 @@ function isLight(color) {
   let b = parseInt(color.substring(4, 6), 16);
   // Формула яркости с учётом восприятия цвета человеком
   return (r * 0.299 + g * 0.587 + b * 0.114) > 180;
+}
+
+function getAttackType(conf) {
+  if (conf.laser) return 'Лазер';
+  if (conf.dot) return 'Яд / DOT';
+  return 'Снаряд';
+}
+
+function getEffectText(conf) {
+  if (conf.dot) return `DOT: ${conf.dot.dps} DPS, ${conf.dot.stackDuration}s, до ${conf.dot.maxStacks} стаков`;
+  if (conf.laser) return 'Мгновенный лазерный луч';
+  return 'Без особого эффекта';
+}
+
+function getSelectedTower() {
+  const cell = state.selectedTowerCell;
+  if (!cell || !state.grid[cell.y] || !state.grid[cell.y][cell.x]) return null;
+  const tower = state.grid[cell.y][cell.x].tower;
+  return tower ? { tower, x: cell.x, y: cell.y, conf: towerData[tower.type] } : null;
+}
+
+export function updateVersionChrome() {
+  const label = `500 TD v${versionInfo.version}`;
+  document.title = label;
+  const versionEl = document.getElementById('version-badge');
+  if (versionEl) versionEl.textContent = `v${versionInfo.version}`;
+}
+
+export function updateBattlePanel() {
+  const panel = document.getElementById('battle-panel');
+  if (!panel) return;
+
+  const queuedEnemies = state.activeSpawners.reduce((sum, s) => sum + Math.max(0, s.left || 0), 0);
+  const remainingEnemies = state.enemies.length + queuedEnemies;
+  const dotEnemies = state.enemies.filter(e => e.dotEffects && e.dotEffects.length).length;
+  const dotStacks = state.enemies.reduce((sum, e) => {
+    return sum + (e.dotEffects || []).reduce((effSum, eff) => effSum + (eff.stacks || 0), 0);
+  }, 0);
+  const activeLasers = state.towers.filter(t => t.laserVisual && t.laserVisual.show > 0).length;
+  const recentEffect = state.lastEffectSummary && (Date.now() - state.lastEffectSummary.at < 5000)
+    ? state.lastEffectSummary
+    : null;
+  const waveState = state.waitingForWaveStart
+    ? 'Ждет запуска'
+    : (state.waveTimeoutActive ? `Пауза ${Math.max(0, Math.ceil(state.wavePauseLeft))}с` : 'Волна идет');
+
+  panel.innerHTML = `
+    <div class="battle-card">
+      <span class="label">Волна</span>
+      <strong>${state.wave} / ${waveData.length}</strong>
+      <small>${waveState}</small>
+    </div>
+    <div class="battle-card">
+      <span class="label">Враги</span>
+      <strong>${remainingEnemies}</strong>
+      <small>${state.enemies.length} на поле</small>
+    </div>
+    <div class="battle-card">
+      <span class="label">Жизни</span>
+      <strong class="health">${state.health}</strong>
+      <small>база</small>
+    </div>
+    <div class="battle-card">
+      <span class="label">Деньги</span>
+      <strong class="money">${state.money}</strong>
+      <small>монеты</small>
+    </div>
+    <div class="battle-card effects-card">
+      <span class="label">Эффекты</span>
+      <strong>${dotStacks ? `Яд: ${dotStacks}` : (recentEffect ? `Недавно: ${recentEffect.type}` : 'Яд: нет')}</strong>
+      <small>DOT врагов: ${dotEnemies} | лазеры: ${activeLasers}${recentEffect ? ` | ${recentEffect.stacks} стак(ов)` : ''}</small>
+    </div>
+  `;
 }
 
 /**
@@ -51,6 +125,9 @@ export function showTowerInfo(type, x = null, y = null) {
   const prevType = getPrevTowerType(type);
   const next = nextType !== null ? towerData[nextType] : null;
   const prev = prevType !== null ? towerData[prevType] : null;
+  if (Number.isInteger(x) && Number.isInteger(y)) {
+    state.selectedTowerCell = { x, y };
+  }
 
   function cell(content, className) {
     className = className || '';
@@ -92,12 +169,19 @@ export function showTowerInfo(type, x = null, y = null) {
         </tr>
         <tr>
           ${cellWithOpacity(prev?.bulletSpeed, 'col-left')}
-          ${cell(conf.bbulletSpeed, 'col-center')}
+          ${cell(conf.bulletSpeed, 'col-center')}
           ${cellWithOpacity(next?.bulletSpeed, 'col-right')}
           ${cell('Скор.пули', 'label-cell')}
         </tr>
+        <tr>
+          ${cellWithOpacity(prev ? getAttackType(prev) : '', 'col-left')}
+          ${cell(getAttackType(conf), 'col-center')}
+          ${cellWithOpacity(next ? getAttackType(next) : '', 'col-right')}
+          ${cell('Тип атаки', 'label-cell')}
+        </tr>
       </tbody>
     </table>
+    <div class="tower-effect-note">${getEffectText(conf)}</div>
   `;
 
   // Дополнительная информация для лазерных башен
@@ -160,7 +244,7 @@ export function showTowerInfo(type, x = null, y = null) {
     downgradeBtn = mkBtn(`▼ ${prev.name} +${prev.cost}`, `downgradeTower(${x},${y})`, prev.color, true);
   }
   if (nextType !== null && x !== null && y !== null) {
-    const can = money >= next.cost;
+    const can = state.money >= next.cost;
     upgradeBtn = mkBtn(`${next.name} ${next.cost} ▲`, `upgradeTower(${x},${y})`, next.color, can);
   }
   let sellBtn = '';
@@ -214,7 +298,7 @@ export function showTowerInfo(type, x = null, y = null) {
   }
 
   // Лог для отладки, показываем тип башне и основные параметры
-  console.log(`showTowerInfo: показана информация о башне "${conf.name}" (type=${type})`);
+  if (state.devMode) console.log(`showTowerInfo: показана информация о башне "${conf.name}" (type=${type})`);
 }
 
 // --- Кнопки ---
@@ -272,11 +356,20 @@ export function createUIButtons() {
     return;
   }
 
-  let html = '';
-  html += `<span class="money">${state.money}</span> | `;
-  html += `<span class="health">${state.health} жизней</span> | `;
-  html += `<span class="wave">${state.wave} / ${waveData.length} волна</span>  `;
-  html += '<hr style="margin:6px 2px">';
+  updateVersionChrome();
+  updateBattlePanel();
+  const selected = getSelectedTower();
+
+  let html = `
+    <div class="shop-header">
+      <div>
+        <strong>Магазин башен</strong>
+        <span class="version-inline">v${versionInfo.version}</span>
+      </div>
+      <small>Выберите башню, затем кликните по свободной клетке поля.</small>
+    </div>
+    <div class="tower-shop-grid">
+  `;
 
   // Вспомогательная функция затемнения цвета
   function darkenColor(hex, percent) {
@@ -308,37 +401,47 @@ export function createUIButtons() {
     let textColor = isLight(background) ? "#282828" : "#fff";
     if (!affordable) textColor = "#888";
     let selClass = (state.selectedTowerType == i ? "selected" : "");
-    let btnStyle = `background:${background};color:${textColor};border:1.5px solid #222;`;
+    const conf = towerData[i];
+    let btnStyle = `--tower-color:${baseColor};background:${background};color:${textColor};`;
 
-    html += '<button ' +
+    html += '<div class="tower-card ' + selClass + (affordable ? '' : ' disabled') + '">' +
+      '<button class="tower-buy-btn" ' +
       'style="' + btnStyle + '" ' +
       'onclick="selectTowerType(' + i + ')" ' +
       'id="btn-tower-' + i + '" ' +
       (affordable ? '' : 'disabled') + ' ' +
       'class="' + selClass + '">' +
-        towerData[i].name + ' ' + towerData[i].cost +
+        '<span>' + conf.name + '</span><strong>' + conf.cost + '</strong>' +
       '</button> ' +
-      '<button onclick="showTowerInfo(' + i + ')" ' +
-      'style="margin:2px 6px 2px 1px;padding:1.5px 7px;border-radius:4px;background:#202028;color:#fabd32;font-size:13px;border:1px solid #575750;vertical-align:middle;cursor:pointer;" ' +
-      'title="Показать параметры">' +
-      'i' +
-      '</button>';
+      '<div class="tower-card-stats">' +
+        '<span>R ' + conf.range + '</span>' +
+        '<span>DMG ' + conf.damage + '</span>' +
+        '<span>CD ' + conf.cooldown + 's</span>' +
+      '</div>' +
+      '<div class="tower-card-effect">' + getAttackType(conf) + '</div>' +
+      '<button class="tower-info-btn" onclick="showTowerInfo(' + i + ')" title="Показать параметры">i</button>' +
+    '</div>';
   }
 
-  // Кнопки апгрейда и продажи башни (появляются только при выборе башни)
-  if (state.selectedTowerType !== null) {
-    html += `<div class="upgrade-sell-buttons">`;
-    html += `<button onclick="upgradeTower()">Апгрейд</button>`;
-    html += `<button onclick="sellTower()">Продать</button>`;
-    html += `</div>`;
-  }
+  html += `</div>`;
 
-  // Кнопка снятия выбора
-  html += `<button onclick="clearTowerSelection()">&#x2716; Снять выбор</button>`;
+  html += `
+    <div class="selected-tower-card">
+      <div>
+        <span class="label">Выбранная башня</span>
+        <strong>${selected ? selected.conf.name : (state.selectedTowerType !== null ? towerData[state.selectedTowerType].name : 'не выбрана')}</strong>
+        <small>${selected ? `Клетка ${selected.x}, ${selected.y} | ${getEffectText(selected.conf)}` : 'Для улучшения или продажи кликните по построенной башне.'}</small>
+      </div>
+      <div class="selected-actions">
+        <button onclick="upgradeSelectedTower()" ${selected ? '' : 'disabled'}>Улучшить</button>
+        <button onclick="sellSelectedTower()" ${selected ? '' : 'disabled'}>Продать</button>
+        <button onclick="clearTowerSelection()">Снять выбор</button>
+      </div>
+    </div>`;
 
   // -- Стильные хоткеи с разными цветами для каждой F-кнопки --
-  html += `<br>
-    <small>
+  html += `
+    <small class="hotkeys">
       <span style="color:#727c88;">1,2,3</span> — быстро выбрать башню 
       &nbsp;•&nbsp; 
       <span style="color:#de4541;">ПКМ</span> — отменить выбор
@@ -361,14 +464,16 @@ export function updateUI() {
 export function selectTowerType(i) {
   if (state.money < towerData[i].cost) return false;
   state.selectedTowerType = i;
+  state.selectedTowerCell = null;
   state.isPlacingTower = true;
   state.buildZoneHints = [];
-  placingTowerCell = null;
+  state.placingTowerCell = null;
   updateUI();
 }
 
 export function clearTowerSelection() {
   state.selectedTowerType = null;
+  state.selectedTowerCell = null;
   state.isPlacingTower = false;
   state.buildZoneHints = [];
   state.placingTowerCell = null;

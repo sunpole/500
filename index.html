@@ -8,7 +8,7 @@
   <meta name="author" content="Магомедов Антон / @xcve33">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   
-  <title> 0.2.0 Tower Defense — Всё в одном</title>
+  <title>500 TD v1.0.1</title>
 
  <style>
   /* Корневые переменные */
@@ -27,6 +27,8 @@
     --success-color: #58a181;
     --failure-color: #b84c4c;
     --shadow-color: rgba(53, 93, 38, 0.5);
+    --surface-strong: #171d22;
+    --accent-color: #fabd32;
   }
 
   /* Общие стили */
@@ -36,34 +38,81 @@
     font-family: sans-serif;
     background: var(--bg-color);
     color: var(--text-color);
-    overflow: hidden; /* Убираем скроллинг */
+    min-height: 100vh;
   }
 
   /* Контейнер для игры и UI */
     .game-container {
-      display: flex;
-      flex-direction: column; /* Расположение элементов по вертикали */
-      align-items: center;    /* Центрируем элементы по горизонтали */
-      margin: 20px;          /* Общий отступ для контейнера */
-      max-width: 800px;      /* Ограничиваем максимальную ширину */
-      width: 100%;           /* Заполняем всю ширину доступного пространства */
+      display: grid;
+      grid-template-columns: minmax(620px, 720px) minmax(360px, 520px);
+      grid-template-areas:
+        "hero hero"
+        "board side"
+        "battle side"
+        "controls controls";
+      align-items: start;
+      justify-content: center;
+      gap: 14px;
+      width: min(1280px, calc(100vw - 28px));
+      margin: 14px auto 24px;
     }
+
+  .game-hero {
+    grid-area: hero;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+    padding: 10px 2px 2px;
+  }
+
+  .game-title {
+    margin: 0;
+    font-size: 24px;
+    letter-spacing: 0;
+  }
+
+  .game-subtitle {
+    margin: 3px 0 0;
+    color: #aebdc8;
+    font-size: 14px;
+  }
+
+  #version-badge, .version-inline {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #53616b;
+    border-radius: 5px;
+    padding: 3px 8px;
+    color: #e7f1f8;
+    background: #202931;
+    font: 13px monospace;
+  }
+
+  .board-wrap {
+    grid-area: board;
+    display: flex;
+    justify-content: center;
+  }
 
   /* Стили канваса */
   canvas {
     display: block;
     background: var(--canvas-bg);
-    margin: 20px auto;
+    margin: 0 auto;
     border: 3px solid var(--border-color);
-    max-width: 100%; /* Ограничиваем ширину канваса */
-    height: auto; /* Сохраняем пропорции */
+    width: min(600px, calc(100vw - 32px));
+    height: auto;
+    box-shadow: 0 12px 34px rgba(0,0,0,0.28);
   }
 
   /* UI-панель */
   .ui-panel {
-    max-width: 800px;
-    margin: 20px auto 0; /* Отступ сверху, чтобы панель была ниже канваса */
-    padding: 8px;
+    grid-area: side;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 12px;
     text-align: left;
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
@@ -72,8 +121,8 @@
 
   /* Кнопка запуск следующей волны */
   #btnNextWave {
-    display: block; /* Сделаем кнопку блочной, чтобы она занимала всю доступную ширину */
-    margin: 10px auto; 
+    display: block;
+    margin: 0 auto; 
     padding: 10px 20px;
     font-size: 18px;
     background: var(--primary-btn-bg);
@@ -100,6 +149,163 @@
     padding: 6px 20px; 
     transition: background 0.15s; 
     display: inline-block; 
+  }
+
+  .shop-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: start;
+    margin-bottom: 10px;
+  }
+
+  .shop-header small,
+  .hotkeys,
+  .selected-tower-card small,
+  .battle-card small {
+    color: #aebdc8;
+  }
+
+  .tower-shop-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .tower-card {
+    position: relative;
+    border: 1px solid #39434b;
+    border-radius: 8px;
+    background: #1b2329;
+    padding: 8px;
+  }
+
+  .tower-card.selected {
+    outline: 2px solid #8df58a;
+    box-shadow: 0 0 0 3px rgba(141, 245, 138, 0.16);
+  }
+
+  .tower-card.disabled {
+    opacity: 0.72;
+  }
+
+  .tower-buy-btn {
+    width: calc(100% - 30px);
+    min-height: 34px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px !important;
+    margin: 0 !important;
+    border: 1px solid #111 !important;
+  }
+
+  .tower-card-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    margin-top: 7px;
+    font-size: 12px;
+    color: #d5e2ea;
+  }
+
+  .tower-card-stats span,
+  .tower-card-effect {
+    background: #131a20;
+    border-radius: 5px;
+    padding: 3px 5px;
+  }
+
+  .tower-card-effect {
+    display: inline-block;
+    margin-top: 6px;
+    color: #9de3ff;
+    font-size: 12px;
+  }
+
+  .tower-info-btn {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    min-width: 22px !important;
+    width: 24px;
+    height: 24px;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    background: #202028 !important;
+    color: var(--accent-color) !important;
+    border: 1px solid #575750 !important;
+    font-weight: bold;
+  }
+
+  .selected-tower-card,
+  .battle-panel {
+    border: 1px solid #3a4650;
+    border-radius: 8px;
+    background: var(--surface-strong);
+  }
+
+  .selected-tower-card {
+    margin-top: 12px;
+    padding: 10px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .selected-tower-card .label,
+  .battle-card .label {
+    display: block;
+    color: #8fa3af;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  .selected-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .selected-actions button:disabled {
+    filter: grayscale(0.7) brightness(0.65);
+    cursor: not-allowed;
+  }
+
+  .battle-panel {
+    grid-area: battle;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .battle-card {
+    background: #202a31;
+    border-radius: 7px;
+    padding: 8px;
+    min-height: 62px;
+  }
+
+  .battle-card strong {
+    display: block;
+    font-size: 20px;
+    margin: 2px 0;
+  }
+
+  .effects-card strong {
+    color: #93eead;
+  }
+
+  .tower-effect-note {
+    background: #111a1f;
+    border: 1px solid #32414a;
+    border-radius: 6px;
+    padding: 7px 9px;
+    color: #d7e9f1;
+    margin: 8px 0;
+    text-align: center;
   }
 
   .ui-panel button.selected {
@@ -140,9 +346,7 @@
 
   /* Таймер волны */
   .wave-counter {
-    position: absolute;
-    right: 20px;
-    top: 10px;
+    position: static;
     font-weight: bold;
     font-size: 1.25em;
     background: rgba(53, 93, 38, 0.7);
@@ -151,6 +355,13 @@
     color: #96f586;
     z-index: 2;
     box-shadow: 0 0 12px #202;
+  }
+
+  .control-strip {
+    grid-area: controls;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
   }
 
   /* Элементы победы и поражения */
@@ -178,6 +389,26 @@
     padding: 4px 8px;
     color: #9cf;
     background: #173045;
+  }
+
+  @media (max-width: 1020px) {
+    .game-container {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "hero"
+        "board"
+        "battle"
+        "side"
+        "controls";
+    }
+
+    .battle-panel {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tower-shop-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* Анимации */
@@ -265,26 +496,43 @@
 
 <body>
   <div class="game-container">
-    <canvas id="game"></canvas>
+    <header class="game-hero">
+      <div>
+        <h1 class="game-title">500 Tower Defense</h1>
+        <p class="game-subtitle">Башни-животные против волн фруктов и овощей</p>
+      </div>
+      <span id="version-badge">v1.0.1</span>
+    </header>
+
+    <div class="board-wrap">
+      <canvas id="game"></canvas>
+    </div>
+
+    <div class="battle-panel" id="battle-panel"></div>
 
     <div class="ui-panel" id="ui-panel"></div>
 
-    <button id="btnNextWave" class="td-btn">ЗАПУСТИТЬ СЛЕДУЮЩУЮ ВОЛНУ</button>
-    <span id="wave-timer" class="wave-counter" style="display:none"></span>
-
-    <div class="dev-panel" id="dev-panel" style="display:none"></div>
+    <div class="control-strip">
+      <button id="btnNextWave" class="td-btn">ЗАПУСТИТЬ СЛЕДУЮЩУЮ ВОЛНУ</button>
+      <span id="wave-timer" class="wave-counter" style="display:none"></span>
+      <div class="dev-panel" id="dev-panel" style="display:none"></div>
+    </div>
   </div>
 
 
     <div id="tower-info" style="
     display:none;
-    position:absolute;
-    top:80px; left:500px;
-    min-width:180px;
+    position:fixed;
+    top:84px; right:22px;
+    width:min(380px, calc(100vw - 44px));
+    max-height:calc(100vh - 120px);
+    overflow:auto;
+    box-sizing:border-box;
     background:#181a22;
     color:#fff;
     padding:12px 14px;
     border-radius:8px;
+    border:1px solid #3a4650;
     box-shadow:0 0 12px #28285a;
     z-index:10;
     font-family:monospace;
