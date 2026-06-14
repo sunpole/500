@@ -6,6 +6,38 @@
 
 ---
 
+## 2026-06-14 — Patch 002: Data, CSS and UI foundation
+
+Тип: `refactor`, `ui`, `docs`, `chore`
+
+### Что сделано
+
+- Версия повышена до `1.0.2`.
+- `enemyData`, `towerData` и `waveData` вынесены из `js/constants.js` в JSON:
+  - `public/data/enemies.json`;
+  - `public/data/towers.json`;
+  - `public/data/waves.json`.
+- `js/constants.js` сохранен как совместимый модуль-экспортер и загружает данные через `import.meta.env.BASE_URL`.
+- CSS вынесен из `index.html` в `css/main.css`.
+- Inline-стили `#tower-info` перенесены в CSS.
+- Hotkeys закреплены: `1-9`, `0`, `Esc`, ПКМ, `F8`, `F9`, `F10`.
+- Стабилизирована высота карточки выбранной башни и заметки эффекта, чтобы интерфейс меньше прыгал при улучшении.
+- Обновлен README с новым расположением данных.
+- Добавлен документ `docs/PATCH_002_DATA_CSS_UI_FOUNDATION.md`.
+
+### Проверка
+
+- `npm run build` проходит.
+- В браузере проверены старт, canvas, магазин, hotkeys, покупка, выбор, улучшение, продажа и старт волны.
+
+### Что не менялось
+
+- Баланс не менялся.
+- `index12.html` не удалялся.
+- Progress stepper апгрейдов оставлен на следующий отдельный патч.
+
+---
+
 ## 2026-06-13 — Patch 001: UI and gameplay safety
 
 Тип: `fix`, `ui`, `docs`

@@ -1,5 +1,5 @@
 // Основной игровой модуль
-import { GRID_SIZE, CELL_SIZE, CANVAS_WIDTH, CANVAS_HEIGHT, towerData, waveData } from './constants.js';
+import { GRID_SIZE, CELL_SIZE, CANVAS_WIDTH, CANVAS_HEIGHT, towerData, waveData, loadGameData } from './constants.js';
 import { Bullet, placeTower, sellTower as sellTowerAction, spawnEnemy, getDeltaTime, distance, applyDotEffect, generateEnemyPath, findPath } from './gameActions.js';
 import { updateUI, updateBattlePanel, updateVersionChrome, showTowerInfo, hideTowerInfo, createUIButtons, getNextTowerType, getPrevTowerType } from './ui.js';
 import { state } from './state.js';
@@ -1006,27 +1006,39 @@ function getCellFromMouse(e) {
 }  
 
 // ===== 11. Управление и ввод =====  
-function handleKeyDown(e) {  
-  // Быстрый выбор башни по 1 2 3
-  if ("123".includes(e.key)) {  
-    let idx = parseInt(e.key) - 1;  
-    if (idx < towerData.length && state.money >= towerData[idx].cost) {   
-      state.selectedTowerType = idx; 
-      state.selectedTowerCell = null;
-      state.isPlacingTower = true;   
-      state.buildZoneHints = [];  
-      updateUI();   
-    }  
-  }  
-  // ВКЛ/ВЫКЛ DEV MODE по F8
-  if (e.key === "F8") toggleDevMode();  
-  // Рестарт по F9
-  if (e.key === "F9") restartGame();  
-  // Очистка локального сохранения по F10
-  if (e.key === "F10") clearSavedGameState();  
+function handleKeyDown(e) {
+  // Quick tower select: 1-9, 0 = tenth tower.
+  if (/^[1-9]$/.test(e.key) || e.key === "0") {
+    const idx = e.key === "0" ? 9 : Number(e.key) - 1;
+    selectTowerByHotkey(idx);
+  }
+
+  if (e.key === "Escape") {
+    window.clearTowerSelection();
+    hideTowerInfo();
+  }
+
+  // Toggle dev mode with F8.
+  if (e.key === "F8") toggleDevMode();
+  // Restart with F9.
+  if (e.key === "F9") restartGame();
+  // Clear local progress with F10.
+  if (e.key === "F10") clearSavedGameState();
 }
 
-// Перезапуск игры (полностью сбрасывает состояние)
+function selectTowerByHotkey(idx) {
+  if (idx < 0 || idx >= towerData.length) return false;
+  if (state.money < towerData[idx].cost) return false;
+  state.selectedTowerType = idx;
+  state.selectedTowerCell = null;
+  state.isPlacingTower = true;
+  state.buildZoneHints = [];
+  state.placingTowerCell = null;
+  updateUI();
+  return true;
+}
+
+// Restart the game and reset runtime state.
 function restartGame() {   
   // Удаляем таблички поражения и победы, если присутствуют
   let go = document.querySelector('.gameover');
@@ -1207,5 +1219,12 @@ window.sellSelectedTower = () => window.sellTower();
 window.clearSavedGameState = clearSavedGameState;
 window.restartGame = restartGame;
 
-window.onload = () => init();
+window.onload = () => {
+  loadGameData()
+    .then(init)
+    .catch((err) => {
+      console.error('[TD] Failed to load game data:', err);
+      alert('Не удалось загрузить данные игры. Проверьте public/data/*.json и запуск через Vite.');
+    });
+};
 window.addEventListener('contextmenu', e => e.preventDefault());

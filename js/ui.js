@@ -3,14 +3,16 @@ import { towerData, waveData } from './constants.js';
 import { state } from './state.js';
 import versionInfo from '../version.json';
 
-// Сортируем индексы башен по цене для удобства поиска следующей/предыдущей башни
-const towerCostOrder = towerData
-  .map((t, i) => ({ i, cost: t.cost }))  // Создаем массив {индекс, цена}
-  .sort((a, b) => a.cost - b.cost)       // Сортируем по цене по возрастанию
-  .map(t => t.i);                        // Оставляем только индексы башен
+function getTowerCostOrder() {
+  return towerData
+    .map((t, i) => ({ i, cost: t.cost }))
+    .sort((a, b) => a.cost - b.cost)
+    .map(t => t.i);
+}
 
 // Получить индекс следующей/предыдущей башни по цене
 export function getNextTowerType(type) {
+  const towerCostOrder = getTowerCostOrder();
   let idx = towerCostOrder.indexOf(type);
   // Если текущей башни нет в списке или это самая дорогая, возвращаем null
   if (idx === -1 || idx === towerCostOrder.length - 1) return null;
@@ -18,6 +20,7 @@ export function getNextTowerType(type) {
 }
 
 export function getPrevTowerType(type) {
+  const towerCostOrder = getTowerCostOrder();
   let idx = towerCostOrder.indexOf(type);
   // Если башня первая или нет в списке — null
   if (idx <= 0) return null;
@@ -442,9 +445,9 @@ export function createUIButtons() {
   // -- Стильные хоткеи с разными цветами для каждой F-кнопки --
   html += `
     <small class="hotkeys">
-      <span style="color:#727c88;">1,2,3</span> — быстро выбрать башню 
+      <span style="color:#727c88;">1-9, 0</span> — быстро выбрать башню 
       &nbsp;•&nbsp; 
-      <span style="color:#de4541;">ПКМ</span> — отменить выбор
+      <span style="color:#de4541;">ПКМ / Esc</span> — отменить выбор
       <br>
       <span style="color:#7ad436;font-weight:bold;background:#202f16;padding:0 4px 0 6px;border-radius:3px;">F8</span> 
       — dev режим &nbsp; 

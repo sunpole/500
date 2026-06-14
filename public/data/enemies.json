@@ -1,0 +1,90 @@
+[
+  {
+    "name": "Яблоко",
+    "hp": 80,
+    "speed": 250,
+    "color": "#ff3e3e",
+    "reward": 7,
+    "damage": 1
+  },
+  {
+    "name": "Банан",
+    "hp": 120,
+    "speed": 120,
+    "color": "#fcbf2f",
+    "reward": 6,
+    "damage": 1
+  },
+  {
+    "name": "Авокадо",
+    "hp": 850,
+    "speed": 100,
+    "color": "#8fc74e",
+    "reward": 15,
+    "damage": 2
+  },
+  {
+    "name": "Арбуз",
+    "hp": 4000,
+    "speed": 200,
+    "color": "#4edc9e",
+    "reward": 120,
+    "damage": 4
+  },
+  {
+    "name": "Дыня",
+    "hp": 2000,
+    "speed": 300,
+    "color": "#ffca98",
+    "reward": 180,
+    "damage": 4
+  },
+  {
+    "name": "Груша",
+    "hp": 8000,
+    "speed": 200,
+    "color": "#a7d09b",
+    "reward": 65,
+    "damage": 4
+  },
+  {
+    "name": "Капуста",
+    "hp": 5000,
+    "speed": 50,
+    "color": "#a3d0a6",
+    "reward": 100,
+    "damage": 3
+  },
+  {
+    "name": "Свекла",
+    "hp": 6000,
+    "speed": 60,
+    "color": "#c84b3f",
+    "reward": 110,
+    "damage": 5
+  },
+  {
+    "name": "Баклажан",
+    "hp": 70000,
+    "speed": 70,
+    "color": "#5c3e7f",
+    "reward": 130,
+    "damage": 6
+  },
+  {
+    "name": "Помидор",
+    "hp": 75000,
+    "speed": 80,
+    "color": "#ff4d4d",
+    "reward": 140,
+    "damage": 6
+  },
+  {
+    "name": "Тыква",
+    "hp": 100000,
+    "speed": 30,
+    "color": "#ff9838",
+    "reward": 200,
+    "damage": 8
+  }
+]
