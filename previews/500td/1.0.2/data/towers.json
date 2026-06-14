@@ -1,0 +1,137 @@
+[
+  {
+    "name": "🐭 Мышка",
+    "cost": 15,
+    "range": 3,
+    "damage": 8,
+    "cooldown": 0.5,
+    "color": "#dcdcdc",
+    "bulletSpeed": 480
+  },
+  {
+    "name": "🦎 Геккон",
+    "cost": 27,
+    "range": 2.5,
+    "damage": 1,
+    "cooldown": 0.2,
+    "color": "#a0f5c4",
+    "bulletSpeed": 500,
+    "dot": {
+      "type": "poison",
+      "dps": 30,
+      "stackDuration": 10,
+      "maxStacks": 50,
+      "multiDps": true,
+      "multiStacks": true
+    }
+  },
+  {
+    "name": "🦜 Попугайчик",
+    "cost": 28,
+    "range": 4,
+    "damage": 9,
+    "cooldown": 0.15,
+    "color": "#ffe3ac",
+    "bulletSpeed": 800
+  },
+  {
+    "name": "🦉 Совёнок",
+    "cost": 32,
+    "range": 3,
+    "damage": 2,
+    "cooldown": 0.1,
+    "color": "#ccf1ff",
+    "bulletSpeed": 1,
+    "laser": true
+  },
+  {
+    "name": "🦊 Лиса",
+    "cost": 60,
+    "range": 3.5,
+    "damage": 75,
+    "cooldown": 0.9,
+    "color": "#ffa64d",
+    "bulletSpeed": 1000
+  },
+  {
+    "name": "🦔 Ёж",
+    "cost": 65,
+    "range": 4,
+    "damage": 1,
+    "cooldown": 0.2,
+    "color": "#8ee5a2",
+    "bulletSpeed": 700,
+    "dot": {
+      "type": "poison",
+      "dps": 80,
+      "stackDuration": 4,
+      "maxStacks": 10,
+      "multiDps": true,
+      "multiStacks": true
+    }
+  },
+  {
+    "name": "🦅 Орёл",
+    "cost": 70,
+    "range": 5,
+    "damage": 3,
+    "cooldown": 0.05,
+    "color": "#b7b7ff",
+    "bulletSpeed": 5,
+    "laser": true
+  },
+  {
+    "name": "🦘 Кенгуру",
+    "cost": 75,
+    "range": 3,
+    "damage": 50,
+    "cooldown": 0.08,
+    "color": "#ffcfde",
+    "bulletSpeed": 1600
+  },
+  {
+    "name": "🦖 Рекс",
+    "cost": 240,
+    "range": 6,
+    "damage": 350,
+    "cooldown": 1.3,
+    "color": "#ff2f2f",
+    "bulletSpeed": 1600
+  },
+  {
+    "name": "🐆 Гепард",
+    "cost": 260,
+    "range": 2.5,
+    "damage": 95,
+    "cooldown": 0.02,
+    "color": "#ffc700",
+    "bulletSpeed": 2800
+  },
+  {
+    "name": "🐉 Дракон",
+    "cost": 280,
+    "range": 5,
+    "damage": 20,
+    "cooldown": 0.01,
+    "color": "#7b2fff",
+    "bulletSpeed": 12,
+    "laser": true
+  },
+  {
+    "name": "🦂 Скорпион",
+    "cost": 800,
+    "range": 4,
+    "damage": 80,
+    "cooldown": 0.15,
+    "color": "#00f5ff",
+    "bulletSpeed": 1400,
+    "dot": {
+      "type": "poison",
+      "dps": 800,
+      "stackDuration": 6,
+      "maxStacks": 250,
+      "multiDps": true,
+      "multiStacks": true
+    }
+  }
+]

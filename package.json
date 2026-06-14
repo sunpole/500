@@ -5,7 +5,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "latest": "npm run build && npm run preview -- --host 127.0.0.1 --port 4173"
+    "latest": "npm run build && npm run preview -- --host 127.0.0.1 --port 4173",
+    "build:pages:v1.0.2": "vite build --base ./ --outDir previews/500td/1.0.2"
   },
   "devDependencies": {
     "vite": "^5.0.0"

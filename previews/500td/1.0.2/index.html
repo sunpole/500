@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tower Defense — захватывающая стратегия, в которой вам предстоит защищать свою базу от волн врагов, строя различные башни и применяя тактические приемы.">
+  <meta name="keywords" content="Tower Defense, стратегия, игра, защита, базу, башни, враги">
+  <meta name="author" content="Магомедов Антон / @xcve33">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  
+  <title>500 TD v1.0.2</title>
+  <script type="module" crossorigin src="./assets/index-DWH87YH3.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DtZGpyzf.css">
+</head>  
+
+<body>
+  <div class="game-container">
+    <header class="game-hero">
+      <div>
+        <h1 class="game-title">500 Tower Defense</h1>
+        <p class="game-subtitle">Башни-животные против волн фруктов и овощей</p>
+      </div>
+      <span id="version-badge">v1.0.2</span>
+    </header>
+
+    <div class="board-wrap">
+      <canvas id="game"></canvas>
+    </div>
+
+    <div class="battle-panel" id="battle-panel"></div>
+
+    <div class="ui-panel" id="ui-panel"></div>
+
+    <div class="control-strip">
+      <button id="btnNextWave" class="td-btn">ЗАПУСТИТЬ СЛЕДУЮЩУЮ ВОЛНУ</button>
+      <span id="wave-timer" class="wave-counter" style="display:none"></span>
+      <div class="dev-panel" id="dev-panel" style="display:none"></div>
+    </div>
+  </div>
+
+
+    <div id="tower-info"></div>
+
+
+  
+</body>
+
+</html>
