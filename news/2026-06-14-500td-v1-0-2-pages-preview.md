@@ -8,6 +8,9 @@ repo_url: https://github.com/sunpole/500
 web_url: https://sunpole.github.io/500/previews/500td/1.0.2/
 branch: codex/publish-telegram-pages-1-0-2
 image: 2026-06-14-500td-v1-0-2-pages-preview.png
+images:
+  - 2026-06-14-500td-v1-0-2-pages-preview_2.png
+  - 2026-06-14-500td-v1-0-2-pages-preview.png
 ---
 
 Подготовлена публикационная сборка версии `1.0.2` для 500 Tower Defense.
