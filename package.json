@@ -1,9 +1,11 @@
 {
   "name": "500",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "preview": "vite preview",
+    "latest": "npm run build && npm run preview -- --host 127.0.0.1 --port 4173"
   },
   "devDependencies": {
     "vite": "^5.0.0"

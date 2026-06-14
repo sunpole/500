@@ -1,7 +1,7 @@
 // Основной игровой модуль
 import { GRID_SIZE, CELL_SIZE, CANVAS_WIDTH, CANVAS_HEIGHT, towerData, waveData } from './constants.js';
-import { Bullet, placeTower, sellTower, spawnEnemy, getDeltaTime, distance, applyDotEffect, generateEnemyPath } from './gameActions.js';
-import { updateUI, showTowerInfo, hideTowerInfo, createUIButtons } from './ui.js';
+import { Bullet, placeTower, sellTower as sellTowerAction, spawnEnemy, getDeltaTime, distance, applyDotEffect, generateEnemyPath, findPath } from './gameActions.js';
+import { updateUI, updateBattlePanel, updateVersionChrome, showTowerInfo, hideTowerInfo, createUIButtons, getNextTowerType, getPrevTowerType } from './ui.js';
 import { state } from './state.js';
 
 // Глобальные переменные, не относящиеся к состоянию
@@ -13,13 +13,15 @@ function init() {
   state.towers = []; state.enemies = []; state.bullets = [];
   state.money = 100; state.health = 10; state.wave = 0;      // wave = 0 чтобы подготовиться к запуску первой волны
   state.selectedTowerType = null;
+  state.selectedTowerCell = null;
   state.isPlacingTower = false; state.placingTowerCell = null;
   state.mouseGridX = state.mouseGridY = null;
   state.buildZoneHints = [];
   state.gameOver = false; state.victory = false; state.defeatCause = "";
   state.activeSpawners = [];                      // сбрасываем активные спавнеры
   state.waveTimeoutActive = true;                 // Сразу ставим паузу перед первой волной
-  state.wavePauseLeft = state.nextWaveDelay;
+  state.waitingForWaveStart = true;
+  state.wavePauseLeft = 0;
   if (typeof state.devLog === "undefined") state.devLog = [];
 
   canvas = document.getElementById('game');
@@ -42,6 +44,7 @@ function init() {
     showGameOverScreen();
     return;
   }
+  updateVersionChrome();
   updateUI();
   try {
     document.getElementById('dev-panel').style.display = state.devMode ? "" : "none";
@@ -53,15 +56,18 @@ function init() {
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('mouseleave', ()=>{state.mouseGridX=null;state.mouseGridY=null;state.buildZoneHints=[];});
     document.addEventListener('keydown', handleKeyDown);
+    const nextWaveBtn = document.getElementById('btnNextWave');
+    if (nextWaveBtn) nextWaveBtn.addEventListener('click', startNextWaveNow);
     canvas._tdEvents = true;
   }
 
   createUIButtons();
 
-  // Не запускаем волну сразу — пауза перед первой волной
+  // Не запускаем волну сразу — игрок сам стартует первую волну кнопкой.
   state.waveTimeoutActive = true;
-  state.wavePauseLeft = state.nextWaveDelay; // Обычно это 3 секунды
-  updateWaveTimerUI(Math.ceil(state.nextWaveDelay));
+  state.waitingForWaveStart = true;
+  state.wavePauseLeft = 0;
+  updateWaveTimerUI('Нажмите кнопку, когда оборона готова');
   document.getElementById('wave-timer').style.display = "";
   requestAnimationFrame(gameLoop);
 
@@ -100,7 +106,7 @@ function gameLoop() {
 // ===== 5. Обновление =====
 function update() {
   let dt = getDeltaTime();
-  console.log('update dt:', dt);
+  if (state.devMode) console.log('update dt:', dt);
 
   updateTimers(dt);
   if (!state.waveTimeoutActive) {
@@ -115,22 +121,43 @@ function update() {
   }
   checkGameOver();
   checkVictoryCondition();
+  updateBattlePanel();
+}
+
+function startNextWaveNow() {
+  if (state.gameOver || state.victory) return;
+  if (state.waveTimeoutActive) {
+    state.waitingForWaveStart = false;
+    state.wavePauseLeft = 0;
+    updateWaveTimerUI(0);
+    const timerEl = document.getElementById('wave-timer');
+    if (timerEl) timerEl.style.display = "none";
+    launchNextWaveIfAvailable();
+  }
 }
 
 
 function updateTimers(dt) {
+  if (state.waitingForWaveStart) return;
   if (state.waveTimeoutActive && state.wavePauseLeft > 0) {
     state.wavePauseLeft -= dt;
     updateWaveTimerUI(Math.max(0, Math.ceil(state.wavePauseLeft)));
     if (state.wavePauseLeft <= 0) {
       state.waveTimeoutActive = false;
       document.getElementById('wave-timer').style.display = "none";
-      if (state.wave < waveData.length) {      // Проверяем, есть ли еще волны
-        launchWave(state.wave);                // Запускаем новую волну через спавнер
-        state.wave++;
-        updateUI();
-      }
+      launchNextWaveIfAvailable();
     }
+  }
+}
+
+function launchNextWaveIfAvailable() {
+  if (state.wave < waveData.length) {
+    launchWave(state.wave);
+    state.wave++;
+    state.waveTimeoutActive = false;
+    state.waitingForWaveStart = false;
+    updateUI();
+    updateBattlePanel();
   }
 }
 
@@ -196,8 +223,9 @@ function checkWaveEnd() {
     !state.waveTimeoutActive
   ) {
     state.waveTimeoutActive = true;
-    state.wavePauseLeft = state.nextWaveDelay;
-    updateWaveTimerUI(state.nextWaveDelay);
+    state.waitingForWaveStart = true;
+    state.wavePauseLeft = 0;
+    updateWaveTimerUI('Волна завершена. Можно запускать следующую.');
 
     const timerEl = document.getElementById('wave-timer');
     if (timerEl) {
@@ -213,7 +241,7 @@ function checkWaveEnd() {
 function updateWaveTimerUI(secLeft) {
   const el = document.getElementById('wave-timer');
   if (el) {
-    el.textContent = `Следующая волна: ${secLeft} сек.`;
+    el.textContent = typeof secLeft === 'number' ? `Следующая волна: ${secLeft} сек.` : secLeft;
   }
 }
 
@@ -455,15 +483,19 @@ function handleMouseClick(e) {
   let [x, y] = pos;
 
   // Показываем инфо-бокс по башне, если не в режиме строительства
-  if (!state.isPlacingTower && grid[y][x].tower) {
+  if (state.grid[y][x].tower) {
     if (state.devMode) console.debug(`[handleMouseClick] Показ инфо по башне на (${x},${y})`);
-    showTowerInfo(grid[y][x].tower.type, x, y);
+    state.selectedTowerCell = { x, y };
+    state.selectedTowerType = state.grid[y][x].tower.type;
+    showTowerInfo(state.grid[y][x].tower.type, x, y);
+    updateUI();
     return;
   }
 
   if (e.button === 2) { // ПКМ — отмена выбора башни и режима строительства
     if (state.devMode) console.debug("[handleMouseClick] ПКМ — отмена выбора башни и режима строительства");
     state.selectedTowerType = null;
+    state.selectedTowerCell = null;
     state.isPlacingTower = false;
     state.placingTowerCell = null;
     updateUI();
@@ -479,6 +511,7 @@ function handleMouseClick(e) {
   if (isCellEmpty(x, y) && canPlaceTower(x, y)) {
     if (state.devMode) console.debug(`[handleMouseClick] Установка башни типа ${state.selectedTowerType} на (${x},${y})`);
     placeTower(x, y, state.selectedTowerType);
+    state.selectedTowerCell = { x, y };
     // Режим строительства не сбрасываем (по вашему замыслу)
     state.placingTowerCell = null;
     state.buildZoneHints = [];
@@ -571,7 +604,7 @@ function canPlaceTower(x, y) {
     x, y,
     ok: found,
     message: found ? "Путь есть, строить можно" : "Путь перекрывается, строить нельзя",
-    towersCount: towers.length
+    towersCount: state.towers.length
   });
   state.grid[y][x].blocked = false;
 
@@ -677,7 +710,7 @@ function hasEnemyPath() {
 
 function draw() {
   // Лог: начало отрисовки
-  console.log("jsdot: draw() start");
+  if (state.devMode) console.log("jsdot: draw() start");
 
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -714,7 +747,7 @@ function draw() {
 
         ctx.restore();
 
-        console.log(`jsdot: draw laser from tower ${t.type} with alpha ${alpha.toFixed(2)}`);
+        if (state.devMode) console.log(`jsdot: draw laser from tower ${t.type} with alpha ${alpha.toFixed(2)}`);
       }
     }
   }
@@ -728,7 +761,7 @@ function draw() {
   if (state.gameOver) showGameOverScreen();
 
   // Лог: конец отрисовка
-  console.log("jsdot: draw() end");
+  if (state.devMode) console.log("jsdot: draw() end");
 }
 
 // Анимация — вызываем draw в цикле через requestAnimationFrame
@@ -843,7 +876,7 @@ function drawBuildHints() {
 
 function drawTowerRanges() {
   if (!state.devMode) return;
-  for (let t of towers) {
+  for (let t of state.towers) {
     let conf = towerData[t.type];
     ctx.save();
     ctx.beginPath();
@@ -895,6 +928,16 @@ function drawEnemies() {
     ctx.fill();
     ctx.strokeStyle = "#4a172a";
     ctx.stroke();
+
+    if (e.dotEffects && e.dotEffects.length) {
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, CELL_SIZE * 0.34, 0, 2 * Math.PI);
+      ctx.strokeStyle = "#81ff8d";
+      ctx.lineWidth = 3;
+      ctx.globalAlpha = 0.75;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
 
     // HP бар
     let hpRatio = e.hp / e.conf.hp;
@@ -967,8 +1010,9 @@ function handleKeyDown(e) {
   // Быстрый выбор башни по 1 2 3
   if ("123".includes(e.key)) {  
     let idx = parseInt(e.key) - 1;  
-    if (idx < towerData.length && money >= towerData[idx].cost) {   
-      selectedTowerType = idx; 
+    if (idx < towerData.length && state.money >= towerData[idx].cost) {   
+      state.selectedTowerType = idx; 
+      state.selectedTowerCell = null;
       state.isPlacingTower = true;   
       state.buildZoneHints = [];  
       updateUI();   
@@ -1083,6 +1127,7 @@ function clearSavedGameState() { localStorage.removeItem('td_save'); restartGame
 window.selectTowerType = (i) => {
   if (state.money < towerData[i].cost) return false;
   state.selectedTowerType = i;
+  state.selectedTowerCell = null;
   state.isPlacingTower = true;
   state.buildZoneHints = [];
   state.placingTowerCell = null;
@@ -1091,6 +1136,7 @@ window.selectTowerType = (i) => {
 
 window.clearTowerSelection = () => {
   state.selectedTowerType = null;
+  state.selectedTowerCell = null;
   state.isPlacingTower = false;
   state.buildZoneHints = [];
   state.placingTowerCell = null;
@@ -1098,6 +1144,12 @@ window.clearTowerSelection = () => {
 };
 
 window.upgradeTower = (x, y) => {
+  if (!Number.isInteger(x) || !Number.isInteger(y)) {
+    const selected = state.selectedTowerCell;
+    if (!selected) return false;
+    x = selected.x;
+    y = selected.y;
+  }
   let cell = state.grid[y][x];
   if (!cell.tower) return false;
   let curType = cell.tower.type;
@@ -1113,6 +1165,12 @@ window.upgradeTower = (x, y) => {
 };
 
 window.downgradeTower = (x, y) => {
+  if (!Number.isInteger(x) || !Number.isInteger(y)) {
+    const selected = state.selectedTowerCell;
+    if (!selected) return false;
+    x = selected.x;
+    y = selected.y;
+  }
   let cell = state.grid[y][x];
   if (!cell.tower) return false;
   let curType = cell.tower.type;
@@ -1128,7 +1186,24 @@ window.downgradeTower = (x, y) => {
 
 window.showTowerInfo = showTowerInfo;
 window.hideTowerInfo = hideTowerInfo;
-window.sellTower = sellTower;
+window.sellTower = (x, y) => {
+  if (!Number.isInteger(x) || !Number.isInteger(y)) {
+    const selected = state.selectedTowerCell;
+    if (!selected) return false;
+    x = selected.x;
+    y = selected.y;
+  }
+  const sold = sellTowerAction(x, y);
+  if (sold) {
+    state.selectedTowerCell = null;
+    state.selectedTowerType = null;
+    state.isPlacingTower = false;
+  }
+  updateUI();
+  return sold;
+};
+window.upgradeSelectedTower = () => window.upgradeTower();
+window.sellSelectedTower = () => window.sellTower();
 window.clearSavedGameState = clearSavedGameState;
 window.restartGame = restartGame;
 

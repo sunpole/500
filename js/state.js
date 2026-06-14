@@ -10,6 +10,7 @@ export const state = {
 
   // Состояние интерфейса
   selectedTowerType: null,
+  selectedTowerCell: null,
   isPlacingTower: false,
   placingTowerCell: null,
   buildZoneHints: [],
@@ -19,11 +20,13 @@ export const state = {
   // Отладка
   devMode: false,
   devLog: [],
+  lastEffectSummary: null,
 
   // Таймеры и волны
   lastUpdateTime: Date.now(),
   activeSpawners: [],
   waveTimeoutActive: false,
+  waitingForWaveStart: false,
   nextWaveDelay: 3,
   wavePauseLeft: 0,
 

@@ -1,12 +1,8 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  base: '/500/',
   build: {
-    outDir: 'dist',
-    rollupOptions: {
-      input: {
-        main: './js/game.js'
-      }
-    }
+    outDir: 'dist'
   }
 })

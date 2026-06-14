@@ -1,7 +1,11 @@
 // Игровые действия и логика
 import { GRID_SIZE, CELL_SIZE, towerData, enemyData } from './constants.js';
 import { state } from './state.js';
-import { updateUI } from './ui.js';
+import { updateUI, hideTowerInfo } from './ui.js';
+
+function debugLogEvent(ev, data) {
+  if (state.devMode) state.devLog.push({ ev, data, t: (+Date.now()).toString(36).slice(-5) });
+}
 
 // ===== Классы =====
 export function Tower(x, y, type) {  
@@ -246,12 +250,23 @@ export function applyDotEffect(enemy, dot) {
       eff.dps += dot.dps;
     }
   }
+
+  state.lastEffectSummary = {
+    type: dot.type,
+    dps: dot.dps,
+    stacks: eff.stacks,
+    at: Date.now()
+  };
 }
 
 // ==== Поиск пути A* между двумя точками с логами =====
 export function findPath(start, goal) {
   function toKey([x, y]) { return `${x},${y}`; }
-  function heuristic(a, b) { return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]); }
+  function heuristic(a, b) {
+    const dx = Math.abs(a[0] - b[0]);
+    const dy = Math.abs(a[1] - b[1]);
+    return (dx + dy) + (Math.SQRT2 - 2) * Math.min(dx, dy);
+  }
   let openSet = [start];
   let gScore = {};
   let fScore = {};
@@ -280,18 +295,22 @@ export function findPath(start, goal) {
 
     closedSet[ckey] = true;
     let [x, y] = current;
-    let neighbors = [[1, 0], [-1, 0], [0, 1], [0, -1]]
-      .map(([dx, dy]) => [x + dx, y + dy])
-      .filter(([nx, ny]) =>
-        nx >= 0 && nx < GRID_SIZE &&
-        ny >= 0 && ny < GRID_SIZE &&
-        !state.grid[ny][nx].blocked
-      );
+    let neighbors = [
+      [1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1],
+      [1, 1, Math.SQRT2], [1, -1, Math.SQRT2],
+      [-1, 1, Math.SQRT2], [-1, -1, Math.SQRT2]
+    ];
 
-    for (let neighbor of neighbors) {
+    for (let [dx, dy, moveCost] of neighbors) {
+      const neighbor = [x + dx, y + dy];
+      const [nx, ny] = neighbor;
+      if (nx < 0 || nx >= GRID_SIZE || ny < 0 || ny >= GRID_SIZE) continue;
+      if (state.grid[ny][nx].blocked) continue;
+      if (dx !== 0 && dy !== 0 && (state.grid[y][nx].blocked || state.grid[ny][x].blocked)) continue;
+
       let nkey = toKey(neighbor);
       if (closedSet[nkey]) continue;
-      let tentative_gScore = gScore[ckey] + 1;
+      let tentative_gScore = gScore[ckey] + moveCost;
       if (!(nkey in gScore) || tentative_gScore < gScore[nkey]) {
         cameFrom[nkey] = current;
         gScore[nkey] = tentative_gScore;
