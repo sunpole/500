@@ -33,6 +33,7 @@
 
 - [GitHub-процесс](GITHUB_WORKFLOW.md)
 - [Протокол патчей](PATCH_PROTOCOL.md)
+- [Patch 002: Data, CSS and UI Foundation](PATCH_002_DATA_CSS_UI_FOUNDATION.md)
 - [Vite](VITE_NOTES.md)
 - [Журнал разработки](DEVELOPMENT_LOG.md)
 - [Changelog](../CHANGELOG.md)
