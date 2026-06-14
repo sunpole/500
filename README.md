@@ -45,6 +45,24 @@ npm run build
 dist/
 ```
 
+Архивная веб-сборка версии `1.0.2` для GitHub Pages:
+
+```bash
+npm run build:pages:v1.0.2
+```
+
+Она собирает игру в папку:
+
+```text
+previews/500td/1.0.2/
+```
+
+После публикации через GitHub Pages эта версия должна открываться как обычная веб-ссылка:
+
+```text
+https://sunpole.github.io/500/previews/500td/1.0.2/
+```
+
 ## Что есть в игре
 
 ### Враги

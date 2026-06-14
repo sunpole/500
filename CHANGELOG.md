@@ -6,6 +6,37 @@
 
 ---
 
+## 2026-06-14 — Patch 003: Telegram patchnote and GitHub Pages preview
+
+Тип: `docs`, `chore`, `release`
+
+### Что сделано
+
+- Добавлена статическая preview-сборка версии `1.0.2`:
+  - `previews/500td/1.0.2/`.
+- Preview-сборка использует относительные пути и может открываться из подпапки GitHub Pages.
+- Добавлен npm-скрипт:
+  - `npm run build:pages:v1.0.2`.
+- Добавлен patchnote для Telegram/uNews:
+  - `news/2026-06-14-500td-v1-0-2-pages-preview.md`;
+  - `news/2026-06-14-500td-v1-0-2-pages-preview.png`.
+- Добавлен документ `docs/PATCH_003_TELEGRAM_PAGES_PREVIEW.md`.
+- README обновлен ссылкой на архивную веб-сборку.
+
+### Проверка
+
+- `npm run build` проходит.
+- `npm run build:pages:v1.0.2` проходит.
+- Preview проверен через простой локальный HTTP-сервер по пути `/previews/500td/1.0.2/`.
+
+### Что не менялось
+
+- Версия игры осталась `1.0.2`.
+- Баланс и gameplay не менялись.
+- `index12.html` не удалялся.
+
+---
+
 ## 2026-06-14 — Patch 002: Data, CSS and UI foundation
 
 Тип: `refactor`, `ui`, `docs`, `chore`
